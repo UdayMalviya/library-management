@@ -1,30 +1,48 @@
 from src.utils import read_csv, write_csv, generate_id
+from config.settings import config
 
-BOOK_FILE = "books.csv"
-BOOK_FIELDS = ["book_id", "title", "author", "available"]
+# BOOK_FILE = "books.csv"
 
-def add_book(title, author):
-    books = read_csv(BOOK_FILE)
-    new_book = {
-        "book_id": generate_id("BK"),
-        "title": title,
-        "author": author,
-        "available": "yes"
-    }
-    books.append(new_book)
-    write_csv(BOOK_FILE, books, BOOK_FIELDS)
-    print(f"Book '{title}' added successfully.")
 
-def search_books(keyword):
-    books = read_csv(BOOK_FILE)
-    results = [b for b in books if keyword.lower() in b["title"].lower() or keyword.lower() in b["author"].lower()]
-    if results:
-        for b in results:
-            print(f"{b['book_id']}: {b['title']} by {b['author']} ({'Available' if b['available']=='yes' else 'Borrowed'})")
-    else:
-        print("No books found.")
+def add_book(title: str, author: str) -> None : # added type hints
+    """ Add book to file
+    Args:
+    - title : str = title of the book
+    - author : str = name of the author
+    """
+    try: 
+        books = read_csv(config.BOOK_FILE)
+        new_book = {
+            "book_id": generate_id("BK"),
+            "title": title,
+            "author": author,
+            "available": "yes"
+        }
+        books.append(new_book)
+        write_csv(config.BOOK_FILE, books, config.BOOK_FIELDS)
+        print(f"Book '{title}' added successfully.")
+    except Exception as e:
+        print(f"Got an exception while adding book: {e}")
 
-def update_book(book_id, new_title=None, new_author=None):
+def search_books(keyword: str):
+    """Search a book if it's available in the file.
+     - Args:
+     keyword: str = a keyword to search the file."""
+    try:
+        books = read_csv(config.BOOK_FILE)
+
+        results = [b for b in books if keyword.lower() in b["title"].lower() or
+                keyword.lower() in b["author"].lower()] # list comprehensios
+        if results:
+            for b in results:
+                print(f"{b['book_id']}: {b['title']} by {b['author']} ({'Available' if b['available']=='yes' else 'Borrowed'})")
+        else:
+            print("No books found.")
+    except Exception as e:
+        print(f" An error occured: {e}")
+
+def update_book(book_id: str, new_title: str | None =None, new_author: str | None = None):
+    """"""
     books = read_csv(BOOK_FILE)
     for book in books:
         if book["book_id"] == book_id:

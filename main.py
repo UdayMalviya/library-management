@@ -1,7 +1,7 @@
 import sys
 from src import book_management, member_management, transaction_management
 
-def main():
+def main(): # function
     while True:
         print("\n=== Library Management CLI ===")
         print("1. Add Book")
