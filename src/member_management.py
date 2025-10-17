@@ -10,7 +10,8 @@ def register_member(name):
         "name": name,
         "status": "active"
     }
-    members.append(new_member)
+    # members._append(new_member)
+    if not os.path.e
     write_csv(MEMBER_FILE, members, MEMBER_FIELDS)
     print(f"Member '{name}' registered successfully.")
 
