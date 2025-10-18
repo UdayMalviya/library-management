@@ -18,6 +18,9 @@ class Settings:
         self.BOOK_FILE = 'books.csv'
         self.MEMBER_FILE = 'member.csv' # todo add them in print_setting func
         self.BOOK_FIELDS = ["book_id", "title", "author", "available"]
+        self.MEMBER_FIELDS = ["member_id", "name", "status"]
+        self.TRANSACTION_FILE = "transactions.csv"
+        self.TRANSACTION_FIELDS = ["member_id", "book_id", "borrow_date", "return_date"]
 
 
         #===== LOGGING =====
@@ -31,6 +34,12 @@ class Settings:
         print('='*60) # repeat `=` 60 times
         print(f"PROJECT ROOT: {self.PROJECT_ROOT}")
         print(f"DATA DIR: {self.DATA_DIR}")
+        print(f"BOOK FILE NAME: {self.BOOK_FILE}")
+        print(f"BOOK FIELDS: {self.BOOK_FIELDS}")
+        print(f"MEMBER FILE NAME: {self.MEMBER_FILE}")
+        print(f"MEMBER FIELDS: {self.MEMBER_FIELDS}")
+        print(f"TRANSACTION FILE NAME: {self.TRANSACTION_FILE}")
+        print(f"TRANSACTION FILE FIELDS: {self.TRANSACTION_FIELDS}")
         print(f"FINE_RATE_PER_DAY: {self.FINE_RATE_PER_DAY}")
         print(f"BORROW_PERIOD_DAYS: {self.BORROW_PERIOD_DAYS}")
         print(f"GRACE_PERIOD_DAYS: {self.GRACE_PERIOD_DAYS}")

@@ -1,23 +1,40 @@
+#BOOK MANAGEMENT
+
+import pandas as pd
 from src.utils import read_csv, write_csv, generate_id
 from config.settings import config
-import pandas as pd
 
-class BOOK:
+
+class BookManager:
+    """
+    BookManager handles all CRUD operations for books stored in a CSV file.
+    """
+
+    def __init__(self):
+        """Initialize and ensure DataFrame consistency."""
+        try:
+            self.file_path = config.BOOK_FILE
+            self.fields = config.BOOK_FIELDS
+            self.df = read_csv(self.file_path)
+
+            # Initialize DataFrame if file is empty or invalid
+            if self.df.empty:
+                self.df = pd.DataFrame(columns=self.fields)
+
+        except Exception as e:
+            print(f"[INIT ERROR] Failed to initialize BookManager: {e}")
+
+    # Core Operations
+    
     def add_book(self, title: str, author: str) -> None:
         """
-        Add a new book to the CSV file.
+        Add a new book record to the system.
 
         Args:
             title (str): Title of the book.
-            author (str): Author's name.
+            author (str): Author of the book.
         """
         try:
-            df = read_csv(config.BOOK_FILE)
-
-            # Initialize DataFrame if empty
-            if df.empty:
-                df = pd.DataFrame(columns=config.BOOK_FIELDS)
-
             new_book = {
                 "book_id": generate_id("BK"),
                 "title": title.strip(),
@@ -25,197 +42,129 @@ class BOOK:
                 "available": "yes"
             }
 
-            df = pd.concat([df, pd.DataFrame([new_book])], ignore_index=True)
-            write_csv(config.BOOK_FILE, df, config.BOOK_FIELDS)
+            self.df = pd.concat([self.df, pd.DataFrame([new_book])], ignore_index=True)
+            write_csv(self.file_path, self.df, self.fields)
 
-            print(f" Book '{title}' added successfully.")
+            print(f" Book '{title}' by {author} added successfully.")
         except Exception as e:
             print(f" Error while adding book: {e}")
 
-# def add_book(title: str, author: str) -> None : # added type hints
-#     """ Add book to file
-#     Args:
-#     - title : str = title of the book
-#     - author : str = name of the author
-#     """
-#     try: 
-#         books = read_csv(config.BOOK_FILE)
-#         new_book = {
-#             "book_id": generate_id("BK"),
-#             "title": title,
-#             "author": author,
-#             "available": "yes"
-#         }
-#         books.append(new_book)
-#         write_csv(config.BOOK_FILE, books, config.BOOK_FIELDS)
-#         print(f"Book '{title}' added successfully.")
-#     except Exception as e:
-#         print(f"Got an exception while adding book: {e}")
+    
 
-# def search_books(keyword: str):
-#     """Search a book if it's available in the file.
-#      - Args:
-#      keyword: str = a keyword to search the file."""
-#     try:
-#         books = read_csv(config.BOOK_FILE)
+    def search_books(self, keyword: str) -> None:
+        """
+        Search for books by keyword in title or author.
 
-#         results = [b for b in books if keyword.lower() in b["title"].lower() or
-#                 keyword.lower() in b["author"].lower()] # list comprehensios
-#         if results:
-#             for b in results:
-#                 print(f"{b['book_id']}: {b['title']} by {b['author']} ({'Available' if b['available']=='yes' else 'Borrowed'})")
-#         else:
-#             print("No books found.")
-#     except Exception as e:
-#         print(f" An error occured: {e}")
+        Args:
+            keyword (str): Keyword to search for.
+        """
+        try:
+            if self.df.empty:
+                print(" No books available in the library.")
+                return
 
-# def update_book(book_id: str, new_title: str | None =None, new_author: str | None = None):
-#     """"""
-#     books = read_csv(BOOK_FILE)
-#     for book in books:
-#         if book["book_id"] == book_id:
-#             if new_title:
-#                 book["title"] = new_title
-#             if new_author:
-#                 book["author"] = new_author
-#             write_csv(BOOK_FILE, books, BOOK_FIELDS)
-#             print("Book updated successfully.")
-#             return
-#     print("Book not found.")
+            mask = (
+                self.df["title"].str.contains(keyword, case=False, na=False) |
+                self.df["author"].str.contains(keyword, case=False, na=False)
+            )
+            results = self.df[mask]
 
-# def delete_book(book_id):
-#     books = read_csv(BOOK_FILE)
-#     updated = [b for b in books if b["book_id"] != book_id]
-#     write_csv(BOOK_FILE, updated, BOOK_FIELDS)
-#     print("Book deleted.")
+            if results.empty:
+                print(" No books found matching your search.")
+                return
+
+            print(f"\n Search Results for '{keyword}':\n")
+            for _, row in results.iterrows():
+                status = "Available" if row["available"].lower() == "yes" else "Borrowed"
+                print(f"{row['book_id']}: {row['title']} by {row['author']} ({status})")
+
+        except Exception as e:
+            print(f" Error while searching books: {e}")
 
 
-# import pandas as pd
-# from src.utils import read_csv, write_csv, generate_id
-# from config.settings import config
+    def update_book(self, book_id: str, new_title: str | None = None, new_author: str | None = None) -> None:
+        """
+        Update a book's title or author.
 
+        Args:
+            book_id (str): ID of the book to update.
+            new_title (str, optional): New title.
+            new_author (str, optional): New author.
+        """
+        try:
+            if self.df.empty or book_id not in self.df["book_id"].values:
+                print(" Book not found.")
+                return
 
-# def add_book(title: str, author: str) -> None:
-#     """
-#     Add a new book to the CSV file.
+            if new_title:
+                self.df.loc[self.df["book_id"] == book_id, "title"] = new_title.strip()
+            if new_author:
+                self.df.loc[self.df["book_id"] == book_id, "author"] = new_author.strip()
 
-#     Args:
-#         title (str): Title of the book.
-#         author (str): Author's name.
-#     """
-#     try:
-#         df = read_csv(config.BOOK_FILE)
+            write_csv(self.file_path, self.df, self.fields)
+            print(" Book updated successfully.")
+        except Exception as e:
+            print(f" Error while updating book: {e}")
 
-#         # Initialize DataFrame if empty
-#         if df.empty:
-#             df = pd.DataFrame(columns=config.BOOK_FIELDS)
+    
 
-#         new_book = {
-#             "book_id": generate_id("BK"),
-#             "title": title.strip(),
-#             "author": author.strip(),
-#             "available": "yes"
-#         }
+    def delete_book(self, book_id: str) -> None:
+        """
+        Delete a book record.
 
-#         df = pd.concat([df, pd.DataFrame([new_book])], ignore_index=True)
-#         write_csv(config.BOOK_FILE, df, config.BOOK_FIELDS)
+        Args:
+            book_id (str): Book ID to delete.
+        """
+        try:
+            if self.df.empty or book_id not in self.df["book_id"].values:
+                print(" Book not found.")
+                return
 
-#         print(f" Book '{title}' added successfully.")
-#     except Exception as e:
-#         print(f" Error while adding book: {e}")
+            self.df = self.df[self.df["book_id"] != book_id]
+            write_csv(self.file_path, self.df, self.fields)
+            print(" Book deleted successfully.")
+        except Exception as e:
+            print(f" Error while deleting book: {e}")
 
+    
 
-# def search_books(keyword: str) -> None:
-#     """
-#     Search for books by title or author.
+    def toggle_availability(self, book_id: str, available: bool) -> None:
+        """
+        Toggle book availability (borrow or return).
 
-#     Args:
-#         keyword (str): Keyword to search in title or author.
-#     """
-#     try:
-#         df = read_csv(config.BOOK_FILE)
-#         if df.empty:
-#             print(" No books available in the library.")
-#             return
+        Args:
+            book_id (str): ID of the book.
+            available (bool): True = returned, False = borrowed.
+        """
+        try:
+            if self.df.empty or book_id not in self.df["book_id"].values:
+                print(" Book not found.")
+                return
 
-#         mask = df["title"].str.contains(keyword, case=False, na=False) | \
-#                df["author"].str.contains(keyword, case=False, na=False)
-#         results = df[mask]
+            self.df.loc[self.df["book_id"] == book_id, "available"] = "yes" if available else "no"
+            write_csv(self.file_path, self.df, self.fields)
 
-#         if results.empty:
-#             print(" No books found matching your search.")
-#         else:
-#             for _, row in results.iterrows():
-#                 status = "Available" if row["available"].lower() == "yes" else "Borrowed"
-#                 print(f"{row['book_id']}: {row['title']} by {row['author']} ({status})")
-#     except Exception as e:
-#         print(f" Error while searching books: {e}")
+            status = "returned" if available else "borrowed"
+            print(f" Book marked as {status}.")
+        except Exception as e:
+            print(f" Error while toggling book availability: {e}")
 
+    
 
-# def update_book(book_id: str, new_title: str | None = None, new_author: str | None = None) -> None:
-#     """
-#     Update the title or author of a book.
+    def list_all_books(self) -> None:
+        """
+        Display all books in the library.
+        """
+        try:
+            if self.df.empty:
+                print(" No books available.")
+                return
 
-#     Args:
-#         book_id (str): ID of the book to update.
-#         new_title (str, optional): New title for the book.
-#         new_author (str, optional): New author for the book.
-#     """
-#     try:
-#         df = read_csv(config.BOOK_FILE)
-#         if df.empty or book_id not in df["book_id"].values:
-#             print(" Book not found.")
-#             return
+            print("\n All Books in Library:\n")
+            for _, row in self.df.iterrows():
+                status = "Available" if row["available"].lower() == "yes" else "Borrowed"
+                print(f"{row['book_id']}: {row['title']} by {row['author']} ({status})")
 
-#         if new_title:
-#             df.loc[df["book_id"] == book_id, "title"] = new_title.strip()
-#         if new_author:
-#             df.loc[df["book_id"] == book_id, "author"] = new_author.strip()
-
-#         write_csv(config.BOOK_FILE, df, config.BOOK_FIELDS)
-#         print(" Book updated successfully.")
-#     except Exception as e:
-#         print(f" Error while updating book: {e}")
-
-
-# def delete_book(book_id: str) -> None:
-#     """
-#     Delete a book record from the CSV file.
-
-#     Args:
-#         book_id (str): ID of the book to delete.
-#     """
-#     try:
-#         df = read_csv(config.BOOK_FILE)
-#         if df.empty or book_id not in df["book_id"].values:
-#             print(" Book not found.")
-#             return
-
-#         df = df[df["book_id"] != book_id]
-#         write_csv(config.BOOK_FILE, df, config.BOOK_FIELDS)
-#         print(" Book deleted successfully.")
-#     except Exception as e:
-#         print(f" Error while deleting book: {e}")
-
-
-# def toggle_availability(book_id: str, available: bool) -> None:
-#     """
-#     Mark a book as borrowed or returned.
-
-#     Args:
-#         book_id (str): ID of the book.
-#         available (bool): True if returned, False if borrowed.
-#     """
-#     try:
-#         df = read_csv(config.BOOK_FILE)
-#         if df.empty or book_id not in df["book_id"].values:
-#             print(" Book not found.")
-#             return
-
-#         df.loc[df["book_id"] == book_id, "available"] = "yes" if available else "no"
-#         write_csv(config.BOOK_FILE, df, config.BOOK_FIELDS)
-
-#         status = "returned" if available else "borrowed"
-#         print(f" Book marked as {status}.")
-#     except Exception as e:
-#         print(f" Error while updating book availability: {e}")
+        except Exception as e:
+            print(f" Error while listing books: {e}")
+        
