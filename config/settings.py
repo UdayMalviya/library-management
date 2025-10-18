@@ -16,7 +16,7 @@ class Settings:
 
         # file names 
         self.BOOK_FILE = 'books.csv'
-        self.MEMBER_FILE = 'member.csv' # todo add them in print_setting func
+        self.MEMBER_FILE = 'member.csv' 
         self.BOOK_FIELDS = ["book_id", "title", "author", "available"]
         self.MEMBER_FIELDS = ["member_id", "name", "status"]
         self.TRANSACTION_FILE = "transactions.csv"
@@ -49,15 +49,4 @@ config = Settings()
 
 if __name__ == "__main__":
     config.print_settings()
-
-
-
-
-
-
-# FINE_RATE_PER_DAY = 5.0        # Fine amount per overdue day
-# BORROW_PERIOD_DAYS = 14        # Default borrowing period
-# GRACE_PERIOD_DAYS = 2          # Days allowed before fine starts
-# DATA_PATH = "data/"
-
 

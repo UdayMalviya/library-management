@@ -36,12 +36,6 @@ class FineManager:
             # Optional: Round to 2 decimal places
             return round(fine_amount, 2)
 
-        except ValueError as ve:
-            print(f" Date parsing or validation error: {ve}")
-            return 0.0
-        except AttributeError:
-            print(" Missing configuration values in settings.")
-            return 0.0
         except Exception as e:
             print(f" Unexpected error while calculating fine: {e}")
             return 0.0
