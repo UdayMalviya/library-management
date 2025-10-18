@@ -17,12 +17,7 @@ class MemberManager:
             self.fields = config.MEMBER_FIELDS
             self.df = read_csv(self.file_path)
 
-            # Load member data
-            # if not os.path.exists(self.file_path):
-            #     self.df = pd.DataFrame(columns=self.fields)
-            #     write_csv(self.file_path, self.df, self.fields)
-            # else:
-            #     self.df = read_csv(self.file_path)
+            
 
             # Ensure DataFrame consistency
             if self.df.empty:
@@ -61,15 +56,7 @@ class MemberManager:
         Args:
             member_id (str): ID of the member to suspend.
         """
-        try:
-            # if self.df.empty or member_id not in self.df["member_id"].values:
-            # if self.df.empty or member_id not in self.df['member_id'].values:
-            #     print(" Member not found.")
-            #     return
-
-            # self.df.loc[self.df["member_id"] == member_id, "status"] = "suspended"
-            # member_id = str(member_id).strip()  # ensure it's a clean string
-            
+        try:          
 
             if self.df.empty or member_id not in self.df["member_id"].astype(str).str.strip().values:
                 

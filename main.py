@@ -5,7 +5,7 @@ from src.fine_management import FineManager
 from src.member_management import MemberManager
 from src.transaction_management import TransactionManager
 
-class LibraryCLI:
+class Library:
     """
     Object-Oriented Library Management Command-Line Interface.
     Combines all management modules into a cohesive interactive shell.
@@ -45,7 +45,8 @@ class LibraryCLI:
         print("6.  Suspend Member")
         print("7.  Borrow Book")
         print("8.  Return Book")
-        print("9.  Calculate Fine (Manual Check)")
+        print("9.  List all Books")
+        print("10.  Calculate Fine (Manual Check)")
         print("0.  Exit")
 
     # === CHOICE HANDLER ===
@@ -69,6 +70,8 @@ class LibraryCLI:
             case "8":
                 self.return_book()
             case "9":
+                self.list_books()
+            case "10":
                 self.calculate_fine()
             case "0":
                 print(" Exiting Library Management System...")
@@ -105,6 +108,9 @@ class LibraryCLI:
             print(" Book ID required.")
             return
         self.book_manager.delete_book(book_id)
+
+    def list_books(self):
+        self.book_manager.list_all_books()
 
     # === MEMBER MANAGEMENT ===
     def register_member(self):
@@ -144,8 +150,10 @@ class LibraryCLI:
         return_date = input("Enter return date (YYYY-MM-DD): ").strip()
         fine = self.fine_manager.calculate_fine(borrow_date, return_date)
         print(f" Fine amount: ₹{fine}")
+    
+
 
 
 if __name__ == "__main__":
-    app = LibraryCLI()
+    app = Library()
     app.run()
